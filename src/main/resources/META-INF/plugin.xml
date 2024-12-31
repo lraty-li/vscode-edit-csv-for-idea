@@ -9,7 +9,13 @@
     <resource-bundle>messages.MyBundle</resource-bundle>
 
     <extensions defaultExtensionNs="com.intellij">
-        <toolWindow factoryClass="com.github.lratyli.vscodeeditcsvforidea.toolWindow.MyToolWindowFactory" id="MyToolWindow"/>
+        <fileType name="TSV"
+                  extensions="tsv"
+                  language="TSV"
+                  fieldName="INSTANCE"
+                  implementationClass="com.github.lratyli.vscodeeditcsvforidea.viewer.lang.TsvFileType"/>
+        <fileEditorProvider implementation="com.github.lratyli.vscodeeditcsvforidea.viewer.ui.editor.TsvFileEditorProvider"/>
+
     </extensions>
 
     <applicationListeners>
