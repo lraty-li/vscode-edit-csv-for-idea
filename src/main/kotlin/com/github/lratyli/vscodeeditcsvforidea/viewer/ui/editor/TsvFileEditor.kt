@@ -1,5 +1,6 @@
 package com.github.lratyli.vscodeeditcsvforidea.viewer.ui.editor
 
+import com.github.lratyli.vscodeeditcsvforidea.services.CustomSchemeHandlerFactory
 import com.intellij.openapi.application.ApplicationManager
 import com.intellij.openapi.diagnostic.logger
 import com.intellij.openapi.project.DumbAware
@@ -10,11 +11,10 @@ import com.intellij.openapi.vfs.VirtualFileManager
 import com.intellij.openapi.vfs.newvfs.BulkFileListener
 import com.intellij.openapi.vfs.newvfs.events.VFileEvent
 import com.intellij.diff.util.FileEditorBase
-import com.intellij.ide.structureView.StructureViewBuilder
 import com.intellij.ui.jcef.JBCefApp
 import com.intellij.ui.jcef.JBCefBrowser
 import com.intellij.ui.jcef.JBCefBrowserBuilder
-import org.cef.handler.CefRequestHandler
+import org.cef.CefApp
 import javax.swing.JComponent
 
 // TODO: Implement state persistence
@@ -24,12 +24,11 @@ class TsvFileEditor(project: Project, private val virtualFile: VirtualFile) : Fi
     private val myBrowser: JBCefBrowser = JBCefBrowserBuilder().setClient(ourCefClient).build()
     val viewComponent = myBrowser.component
 
-
     companion object {
         private val logger = logger<TsvFileEditor>()
         private const val NAME = "TsvEditor"
 
-        private const val HOST_NAME = "localhost"
+        private const val HOST_NAME = "tsv-viewer"
         private const val PROTOCOL = "http"
         private const val VIEWER_PATH = "/index.html"
         private const val VIEWER_URL = "$PROTOCOL://$HOST_NAME$VIEWER_PATH"
@@ -48,7 +47,7 @@ class TsvFileEditor(project: Project, private val virtualFile: VirtualFile) : Fi
         myBrowser.loadURL(VIEWER_URL)
 
         messageBusConnection.subscribe(VirtualFileManager.VFS_CHANGES, fileChangedListener)
-
+        registerAppSchemeHandler()
     }
 
     override fun getName(): String = NAME
@@ -78,6 +77,14 @@ class TsvFileEditor(project: Project, private val virtualFile: VirtualFile) : Fi
         super.dispose()
     }
 
-
+    private fun registerAppSchemeHandler() {
+        CefApp
+            .getInstance()
+            .registerSchemeHandlerFactory(
+                PROTOCOL,
+                HOST_NAME,
+                 CustomSchemeHandlerFactory()
+            )
+    }
 
 }
