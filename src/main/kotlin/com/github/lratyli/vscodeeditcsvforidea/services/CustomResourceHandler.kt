@@ -20,12 +20,15 @@ class CustomResourceHandler : CefResourceHandler {
         cefRequest: CefRequest,
         cefCallback: CefCallback
     ): Boolean {
-        val urlOption = cefRequest.url?.let { it }
+        val urlOption = cefRequest.url
         return if (urlOption != null) {
-            val processedUrl = urlOption.replace("http://tsv-viewer", "vscode-edit-csv/csvEditorHtml")
+            val processedUrl = urlOption.replace("http://tsv-viewer", "vscode-edit-csv")
             val newUrl = this::class.java.classLoader.getResource(processedUrl)
+            logger<CustomResourceHandler>().warn("urlOption: $urlOption")
             logger<CustomResourceHandler>().warn("processedUrl: $processedUrl")
-            state = OpenedConnection(newUrl.openConnection())
+            if (newUrl != null) {
+                state = OpenedConnection(newUrl.openConnection())
+            }
             cefCallback.Continue()
             true
         } else {
@@ -33,7 +36,7 @@ class CustomResourceHandler : CefResourceHandler {
         }
     }
 
-    override fun getResponseHeaders(cefResponse: CefResponse?, p1: org.cef.misc.IntRef?, p2: org.cef.misc.StringRef?) {
+    override fun getResponseHeaders(cefResponse: CefResponse?, p1: IntRef?, p2: StringRef?) {
         if(cefResponse != null && p1 != null && p2!= null){
             state.getResponseHeaders(cefResponse, p1, p2)
         }
@@ -91,7 +94,7 @@ data class OpenedConnection(val connection: URLConnection) : ResourceHandlerStat
             responseLength.set(inputStream.available())
             cefResponse.status = 200
         } catch (e: IOException) {
-            cefResponse.setError(CefLoadHandler.ErrorCode.ERR_FILE_NOT_FOUND)
+            cefResponse.error = CefLoadHandler.ErrorCode.ERR_FILE_NOT_FOUND
             cefResponse.statusText = e.localizedMessage
             cefResponse.status = 404
         }
@@ -128,7 +131,7 @@ object ClosedConnection : ResourceHandlerState {
         responseLength: IntRef,
         redirectUrl: StringRef
     ) {
-        cefResponse.setStatus(404)
+        cefResponse.status = 404
     }
 
     override fun readResponse(

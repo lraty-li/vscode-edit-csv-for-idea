@@ -30,7 +30,7 @@ class TsvFileEditor(project: Project, private val virtualFile: VirtualFile) : Fi
 
         private const val HOST_NAME = "tsv-viewer"
         private const val PROTOCOL = "http"
-        private const val VIEWER_PATH = "/index.html"
+        private const val VIEWER_PATH = "/csvEditorHtml/browser/indexBrowser.html"
         private const val VIEWER_URL = "$PROTOCOL://$HOST_NAME$VIEWER_PATH"
 
         private val ourCefClient = JBCefApp.getInstance().createClient()
