@@ -1,0 +1,3 @@
+[submodule "src/main/resources/vscode-edit-csv"]
+	path = src/main/resources/vscode-edit-csv
+	url = https://github.com/janisdd/vscode-edit-csv.git
