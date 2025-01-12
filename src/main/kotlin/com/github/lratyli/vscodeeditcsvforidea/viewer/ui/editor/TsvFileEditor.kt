@@ -1,6 +1,8 @@
 package com.github.lratyli.vscodeeditcsvforidea.viewer.ui.editor
 
+import com.github.lratyli.vscodeeditcsvforidea.services.CustomLoadHandler
 import com.github.lratyli.vscodeeditcsvforidea.services.CustomSchemeHandlerFactory
+import com.intellij.diff.util.FileEditorBase
 import com.intellij.openapi.application.ApplicationManager
 import com.intellij.openapi.diagnostic.logger
 import com.intellij.openapi.project.DumbAware
@@ -10,12 +12,14 @@ import com.intellij.openapi.vfs.VirtualFile
 import com.intellij.openapi.vfs.VirtualFileManager
 import com.intellij.openapi.vfs.newvfs.BulkFileListener
 import com.intellij.openapi.vfs.newvfs.events.VFileEvent
-import com.intellij.diff.util.FileEditorBase
 import com.intellij.ui.jcef.JBCefApp
 import com.intellij.ui.jcef.JBCefBrowser
 import com.intellij.ui.jcef.JBCefBrowserBuilder
+import com.intellij.ui.jcef.JBCefClient
 import org.cef.CefApp
+import org.cef.handler.CefLoadHandler
 import javax.swing.JComponent
+
 
 // TODO: Implement state persistence
 class TsvFileEditor(project: Project, private val virtualFile: VirtualFile) : FileEditorBase(), DumbAware {
@@ -23,7 +27,7 @@ class TsvFileEditor(project: Project, private val virtualFile: VirtualFile) : Fi
     private val fileChangedListener = FileChangedListener(true)
     private val myBrowser: JBCefBrowser = JBCefBrowserBuilder().setClient(ourCefClient).build()
     val viewComponent = myBrowser.component
-
+    private val myLoadHandler: CefLoadHandler
     companion object {
         private val logger = logger<TsvFileEditor>()
         private const val NAME = "TsvEditor"
@@ -41,13 +45,15 @@ class TsvFileEditor(project: Project, private val virtualFile: VirtualFile) : Fi
     }
 
     init {
-        //Disposer.register(this, viewComponent)
         Disposer.register(this, messageBusConnection)
-        //ourCefClient.addRequestHandler(myRequestHandler, myBrowser.cefBrowser)
         myBrowser.loadURL(VIEWER_URL)
-
         messageBusConnection.subscribe(VirtualFileManager.VFS_CHANGES, fileChangedListener)
         registerAppSchemeHandler()
+        //Set the property JBCefClient.Properties.JS_QUERY_POOL_SIZE to use JBCefJSQuery after the browser has been created
+        myBrowser.jbCefClient.setProperty(JBCefClient.Properties.JS_QUERY_POOL_SIZE, 10)
+        myLoadHandler = CustomLoadHandler(virtualFile.path)
+
+        ourCefClient.addLoadHandler(myLoadHandler, myBrowser.cefBrowser)
     }
 
     override fun getName(): String = NAME
@@ -72,8 +78,7 @@ class TsvFileEditor(project: Project, private val virtualFile: VirtualFile) : Fi
     }
 
     override fun dispose() {
-        //ourCefClient.removeRequestHandler(myRequestHandler, myBrowser.cefBrowser)
-        //ourCefClient.removeLoadHandler(myLoadHandler, myBrowser.cefBrowser)
+        ourCefClient.removeLoadHandler(myLoadHandler, myBrowser.cefBrowser)
         super.dispose()
     }
 
@@ -87,4 +92,9 @@ class TsvFileEditor(project: Project, private val virtualFile: VirtualFile) : Fi
             )
     }
 
+
+
 }
+
+
+

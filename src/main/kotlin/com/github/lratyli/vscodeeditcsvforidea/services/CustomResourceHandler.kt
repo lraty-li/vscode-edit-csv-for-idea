@@ -1,7 +1,6 @@
 package com.github.lratyli.vscodeeditcsvforidea.services
 
 
-import com.intellij.openapi.diagnostic.logger
 import org.cef.callback.CefCallback
 import org.cef.handler.CefLoadHandler
 import org.cef.handler.CefResourceHandler
@@ -9,23 +8,30 @@ import org.cef.misc.IntRef
 import org.cef.misc.StringRef
 import org.cef.network.CefRequest
 import org.cef.network.CefResponse
+import java.io.File
 import java.io.IOException
 import java.io.InputStream
+import java.net.URL
 import java.net.URLConnection
 
 class CustomResourceHandler : CefResourceHandler {
     private var state: ResourceHandlerState = ClosedConnection
-
+    //TODO gather match pattern
+    val regex = Regex(""".*\.(tsv|csv)$""", RegexOption.IGNORE_CASE)
     override fun processRequest(
         cefRequest: CefRequest,
         cefCallback: CefCallback
     ): Boolean {
         val urlOption = cefRequest.url
         return if (urlOption != null) {
-            val processedUrl = urlOption.replace("http://tsv-viewer", "vscode-edit-csv")
-            val newUrl = this::class.java.classLoader.getResource(processedUrl)
-            logger<CustomResourceHandler>().warn("urlOption: $urlOption")
-            logger<CustomResourceHandler>().warn("processedUrl: $processedUrl")
+            val replacement = if (regex.containsMatchIn(urlOption)) "" else "vscode-edit-csv"
+            val processedUrl = urlOption.replace("http://tsv-viewer", replacement)
+
+            val newUrl: URL? = if (regex.containsMatchIn(urlOption)) {
+                URL("file://$processedUrl")
+            } else {
+                this::class.java.classLoader.getResource(processedUrl)
+            }
             if (newUrl != null) {
                 state = OpenedConnection(newUrl.openConnection())
             }
@@ -35,6 +41,7 @@ class CustomResourceHandler : CefResourceHandler {
             false
         }
     }
+
 
     override fun getResponseHeaders(cefResponse: CefResponse?, p1: IntRef?, p2: StringRef?) {
         if(cefResponse != null && p1 != null && p2!= null){
@@ -76,7 +83,12 @@ sealed interface ResourceHandlerState {
 
 
 data class OpenedConnection(val connection: URLConnection) : ResourceHandlerState {
-    private val inputStream: InputStream by lazy { connection.inputStream }
+    val regex = Regex(""".*\.(tsv|csv)$""", RegexOption.IGNORE_CASE)
+    private val inputStream: InputStream by lazy {
+        if(regex.containsMatchIn(connection.url.toString())){
+            File(connection.url.file).inputStream()
+        }
+        connection.inputStream }
 
     override fun getResponseHeaders(
         cefResponse: CefResponse,
@@ -89,6 +101,7 @@ data class OpenedConnection(val connection: URLConnection) : ResourceHandlerStat
                 url.contains(".css") -> cefResponse.mimeType = "text/css"
                 url.contains(".js") -> cefResponse.mimeType = "text/javascript"
                 url.contains(".html") -> cefResponse.mimeType = "text/html"
+                url.contains(".tsv") -> cefResponse.mimeType = "text/tsv"
                 else -> cefResponse.mimeType = connection.contentType // since 2021.1 all mime type must be set here, by hand
             }
             responseLength.set(inputStream.available())
@@ -106,6 +119,7 @@ data class OpenedConnection(val connection: URLConnection) : ResourceHandlerStat
         bytesRead: IntRef,
         callback: CefCallback
     ): Boolean {
+
         val availableSize = inputStream.available()
         return if (availableSize > 0) {
             val maxBytesToRead = minOf(availableSize, designedBytesToRead)
