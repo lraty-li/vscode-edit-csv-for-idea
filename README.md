@@ -4,6 +4,23 @@
 [![Version](https://img.shields.io/jetbrains/plugin/v/MARKETPLACE_ID.svg)](https://plugins.jetbrains.com/plugin/MARKETPLACE_ID)
 [![Downloads](https://img.shields.io/jetbrains/plugin/d/MARKETPLACE_ID.svg)](https://plugins.jetbrains.com/plugin/MARKETPLACE_ID)
 
+## known issue:
+
+中文输入法 没反应
+
+切换idea Java
+change ide java runtime
+https://www.jetbrains.com/help/idea/switching-boot-jdk.html
+
+TODO
+弹窗提示
+if (JBCefApp.isSupported()) {
+// use JCEF
+} else {
+// optional fallback to an alternative browser-less solution
+}
+
+
 ## Template ToDo list
 - [x] Create a new [IntelliJ Platform Plugin Template][template] project.
 - [ ] Get familiar with the [template documentation][template].
