@@ -18,6 +18,10 @@ if (JBCefApp.isSupported()) {
 // optional fallback to an alternative browser-less solution
 }
 
+## build
+实际csv编辑器位于 src/main/resources/vscode-edit-csv ，是git submodule，需要一起clone
+https://github.com/janisdd/vscode-edit-csv/tree/02d21b98577b0ad8afa64f257f8cfdcc5b8760c8
+并根据其 build 指南 build src/main/resources/vscode-edit-csv/csvEditorHtml 中的内容
 
 ## Template ToDo list
 - [x] Create a new [IntelliJ Platform Plugin Template][template] project.
