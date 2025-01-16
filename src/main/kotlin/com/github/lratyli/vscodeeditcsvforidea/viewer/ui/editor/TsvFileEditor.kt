@@ -15,6 +15,7 @@ import com.intellij.openapi.vfs.newvfs.events.VFileEvent
 import com.intellij.ui.jcef.*
 import javax.swing.JComponent
 import org.cef.CefApp
+import org.cef.handler.CefDownloadHandler
 import org.cef.handler.CefLoadHandler
 
 // TODO: Implement state persistence
@@ -25,7 +26,7 @@ class TsvFileEditor(project: Project, private val virtualFile: VirtualFile) :
     private val myBrowser: JBCefBrowser = JBCefBrowserBuilder().setClient(ourCefClient).build()
     private val viewComponent = myBrowser.component
     private val myLoadHandler: CefLoadHandler
-    // private val myDownloadHandler: CefDownloadHandler
+    private val myDownloadHandler: CefDownloadHandler
     companion object {
         private val logger = logger<TsvFileEditor>()
         private const val NAME = "TsvEditor"
@@ -64,10 +65,12 @@ class TsvFileEditor(project: Project, private val virtualFile: VirtualFile) :
         // browser has been created
         myBrowser.jbCefClient.setProperty(JBCefClient.Properties.JS_QUERY_POOL_SIZE, 10)
         myLoadHandler = CustomLoadHandler(virtualFile, myBrowser)
-        // myDownloadHandler = CustomDownloadHandler(virtualFile.path)
         ourCefClient.addLoadHandler(myLoadHandler, myBrowser.cefBrowser)
-        // ourCefClient.addDownloadHandler(myDownloadHandler, myBrowser.cefBrowser)
-        myBrowser.cefBrowser.setFocus(true);
+
+        myDownloadHandler = CustomDownloadHandler(virtualFile.path)
+        ourCefClient.addDownloadHandler(myDownloadHandler, myBrowser.cefBrowser)
+
+        myBrowser.cefBrowser.setFocus(true)
     }
 
     override fun getName(): String = NAME
@@ -93,6 +96,7 @@ class TsvFileEditor(project: Project, private val virtualFile: VirtualFile) :
 
     override fun dispose() {
         ourCefClient.removeLoadHandler(myLoadHandler, myBrowser.cefBrowser)
+        ourCefClient.removeDownloadHandle(myDownloadHandler, myBrowser.cefBrowser)
         super.dispose()
     }
 

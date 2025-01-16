@@ -14,7 +14,7 @@ class CustomDownloadHandler(virtualFilePath: String) : CefDownloadHandlerAdapter
             suggestedName: String?,
             callback: CefBeforeDownloadCallback?
     ) {
-        callback?.Continue(filePath, false)
+        callback?.Continue(filePath, true)
         println("File will be saved to: $filePath")
     }
 

@@ -61,13 +61,6 @@ class CustomLoadHandler(virtualFile: VirtualFile, myBrowser: JBCefBrowserBase) :
               });
             */
 
-            // bind ctrl s to save file
-            //            browser.executeJavaScript("Mousetrap.bindGlobal(['meta+s', 'ctrl+s'], (e)
-            // => {\n" +
-            //                    "\te.preventDefault()\n" +
-            //                    "\tdownloadAsFile()\n" +
-            //                    "})",null,0)
-
             registerFileSaveHandler(browser)
         }
     }
