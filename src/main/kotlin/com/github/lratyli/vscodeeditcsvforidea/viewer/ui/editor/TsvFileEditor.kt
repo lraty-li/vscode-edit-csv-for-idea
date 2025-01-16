@@ -67,7 +67,7 @@ class TsvFileEditor(project: Project, private val virtualFile: VirtualFile) :
         // myDownloadHandler = CustomDownloadHandler(virtualFile.path)
         ourCefClient.addLoadHandler(myLoadHandler, myBrowser.cefBrowser)
         // ourCefClient.addDownloadHandler(myDownloadHandler, myBrowser.cefBrowser)
-
+        myBrowser.cefBrowser.setFocus(true);
     }
 
     override fun getName(): String = NAME

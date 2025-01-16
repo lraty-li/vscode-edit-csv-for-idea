@@ -6,8 +6,6 @@
 
 ## known issue:
 
-中文输入法 没反应
-
 切换idea Java
 change ide java runtime
 https://www.jetbrains.com/help/idea/switching-boot-jdk.html
