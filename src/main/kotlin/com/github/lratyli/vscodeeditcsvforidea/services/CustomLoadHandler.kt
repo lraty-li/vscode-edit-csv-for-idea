@@ -77,6 +77,7 @@ class CustomLoadHandler(virtualFile: VirtualFile, myBrowser: JBCefBrowserBase) :
         }
         browser.executeJavaScript(
                 "function saveToIdeaFile(content) {" +
+                        "new Toast(\"save file\",'message',3000);" +
                         openLinkQuery.inject("content") +
                         "};",
                 null,
